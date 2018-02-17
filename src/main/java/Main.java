@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class Main extends Application {
@@ -61,6 +62,7 @@ public class Main extends Application {
             AddNoteController controller = loader.getController();
             controller.setAddStage(stage);
             controller.setNotes(notes);
+            controller.setDateLabel(new Date());
 
             stage.showAndWait();
 
