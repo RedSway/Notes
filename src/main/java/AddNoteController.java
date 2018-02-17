@@ -69,8 +69,6 @@ public class AddNoteController {
 
         } else if (valueTextArea.getText() != null || valueTextArea.getText().length() != 0) {
             notes.setValue(valueTextArea.getText());
-            /*Date date = new Date();
-            date.setTime(Long.parseLong(dateLabel.getText()));*/
             notes.setDate(new Timestamp(getDateLabel().getTime()));
             DBHelper.addNoteToDB(notes);
 
