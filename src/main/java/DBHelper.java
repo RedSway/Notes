@@ -1,8 +1,10 @@
 import com.mysql.fabric.jdbc.FabricMySQLDriver;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 
 public class DBHelper {
@@ -42,7 +44,7 @@ public class DBHelper {
         return null;
     }
 
-    static void addNoteToDB(Notes notes) {
+    static String addNoteToDB(Notes notes) {
         Connection connection;
         PreparedStatement preparedStatement;
 
@@ -61,8 +63,10 @@ public class DBHelper {
 
             connection.close();
 
+            return "Added";
         } catch (SQLException e) {
             e.printStackTrace();
+            return "Not added";
         }
 
     }

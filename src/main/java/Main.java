@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.*;
 
 public class Main extends Application {
 
@@ -74,7 +75,17 @@ public class Main extends Application {
     }
 
     public Main() {
-        List<Notes> listNotes = DBHelper.loadDB();
+
+        ExecutorService service = Executors.newFixedThreadPool(1);
+        final Future<List<Notes>> future = service.submit(DBHelper::loadDB);
+        List<Notes> listNotes = null;
+        try {
+            listNotes = future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        service.shutdownNow();
 
         for (Notes note : listNotes) {
             System.out.println(note.getValue() + "---" + simpleDateFormat.format(note.getDate()));

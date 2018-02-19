@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.*;
 
 public class AddNoteController {
 
@@ -68,12 +69,24 @@ public class AddNoteController {
             alert.showAndWait();
 
         } else if (valueTextArea.getText() != null || valueTextArea.getText().length() != 0) {
+
             notes.setValue(valueTextArea.getText());
             notes.setDate(new Timestamp(getDateLabel().getTime()));
-            DBHelper.addNoteToDB(notes);
 
-            saveClicked = true;
-            addStage.close();
+            ExecutorService service = Executors.newFixedThreadPool(2);
+            Future future = service.submit(() -> {
+                Thread.sleep(2000);
+                return DBHelper.addNoteToDB(notes);
+            });
+            try {
+                saveClicked = true;
+                addStage.close();
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            service.shutdown();
         }
 
     }
