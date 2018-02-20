@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
@@ -17,15 +18,18 @@ public class Main extends Application {
 
     private Stage primaryStage;
     private AnchorPane rootLayout;
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
     private ObservableList<Notes> notesDate = FXCollections.observableArrayList();
+    private ExecutorService service = Executors.newFixedThreadPool(1);
 
     @Override
-    public void start(Stage primaryStage){
+    public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("Notes");
 
         initRootLayout();
+
+        Thread thread = new Thread(this::ini);
+        thread.start();
     }
 
     private void initRootLayout() {
@@ -74,24 +78,21 @@ public class Main extends Application {
         }
     }
 
-    public Main() {
-
-        ExecutorService service = Executors.newFixedThreadPool(1);
-        final Future<List<Notes>> future = service.submit(DBHelper::loadDB);
+    private void ini() {
         List<Notes> listNotes = null;
         try {
-            listNotes = future.get();
+            Future<List<Notes>> future = service.submit(DBHelper::loadDB);
+            listNotes = future.get();;
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
 
         service.shutdownNow();
 
-        for (Notes note : listNotes) {
-            System.out.println(note.getValue() + "---" + simpleDateFormat.format(note.getDate()));
-            notesDate.add(note);
-        }
+        notesDate.addAll(listNotes);
     }
+
+    public Main() {}
 
     public ObservableList<Notes> getNotesDate() {
         return notesDate;

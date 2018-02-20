@@ -22,11 +22,10 @@ public class AddNoteController {
     private Notes notes;
     private boolean saveClicked = false;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private ExecutorService service = Executors.newFixedThreadPool(2);
 
     @FXML
-    private void initialize(){
-
-    }
+    private void initialize() {}
 
     public void setAddStage(Stage addStage) {
         this.addStage = addStage;
@@ -45,11 +44,10 @@ public class AddNoteController {
         dateLabel.setText("Текущее дата/время: " + simpleDateFormat.format(date));
     }
 
-    public Date getDateLabel() {
+    private Date getDateLabel() {
         try {
             String s = dateLabel.getText().replaceAll("Текущее дата/время: ", "");
-            Date date = simpleDateFormat.parse(s);
-            return date;
+            return simpleDateFormat.parse(s);
         } catch (ParseException e) {
             e.printStackTrace();
             return null;
@@ -69,18 +67,14 @@ public class AddNoteController {
             alert.showAndWait();
 
         } else if (valueTextArea.getText() != null || valueTextArea.getText().length() != 0) {
-
-            notes.setValue(valueTextArea.getText());
-            notes.setDate(new Timestamp(getDateLabel().getTime()));
-
-            ExecutorService service = Executors.newFixedThreadPool(2);
-            Future future = service.submit(() -> {
-                Thread.sleep(2000);
-                return DBHelper.addNoteToDB(notes);
-            });
             try {
+                notes.setValue(valueTextArea.getText());
+                notes.setDate(new Timestamp(getDateLabel().getTime()));
+
+                Future future = service.submit(() -> DBHelper.addNoteToDB(notes));
                 saveClicked = true;
                 addStage.close();
+
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
